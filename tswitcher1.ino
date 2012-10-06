@@ -25,9 +25,6 @@ int relayPins[NUM_RELAYS][2] = {
 int buttonPins[NUM_BUTTONS] = { 
   7,8 };
 
-#define LED1_PIN_RED   26
-#define LED1_PIN_GREEN 25
-#define LED1_PIN_BLUE  24
 int rgbLEDpins[NUM_RGB_LEDS][3] = {
   { 26,25,24 }
 };
@@ -79,8 +76,8 @@ void loop()
 {
 
   for (thisPin = 0; thisPin < NUM_BUTTONS; thisPin++)  {
-    Serial.print("checking pin #");
-    Serial.println(thisPin,DEC);
+    //Serial.print("checking pin #");
+    //Serial.println(thisPin,DEC);
     // Update the debouncer
     if(bouncer[thisPin].update()){
       // Get the update value
@@ -98,7 +95,7 @@ void loop()
   }
 
   // change this to slow down the looping.
-  delay(500);
+  //delay(50);
 
 }
 
