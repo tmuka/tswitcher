@@ -13,22 +13,24 @@
 
 elapsedMillis sinceInit;
 
-#define NUM_BUTTONS 2
-#define NUM_RELAYS 2
+#define NUM_BUTTONS 3
+#define NUM_RELAYS 3
+#define NUM_LEDS 3
 #define NUM_RGB_LEDS 1
 
 #define DEBOUNCE_MS 5
 
 //define the single coil latching relay pins in a multi-dimensional array. remember this is zero indexed.
 int relayPins[NUM_RELAYS][2] = {
-    { 9,10 } ,
-    { 9,10 }
+    {  9,10 },
+    { 11,12 },
+    { 13,14 }
 };
 
 #define TAP_TEMPO_RELAY_NUM NULL
 
-int buttonPins[NUM_BUTTONS] = { 7,8 };
-
+int buttonPins[NUM_BUTTONS] = { 6,7,8 };
+int ledPins[NUM_LEDS] = { 38,39,40 };
 int rgbLEDpins[NUM_RGB_LEDS][3] = {
     { 26,25,24 }
 };
@@ -49,7 +51,8 @@ int excludeButtonFromPresets[NUM_BUTTONS] = {0}; //inits the state array to all 
 // couldn't figure out how to make this code dynamic for NUM_BUTTONS
 Bounce bouncer[NUM_BUTTONS] = {
     Bounce( buttonPins[0],DEBOUNCE_MS ),
-    Bounce( buttonPins[1],DEBOUNCE_MS )
+    Bounce( buttonPins[1],DEBOUNCE_MS ),
+    Bounce( buttonPins[2],DEBOUNCE_MS )
 };
 
 int buttonLastRise[NUM_BUTTONS] = {0}; //inits the state array to all zeros
@@ -80,6 +83,11 @@ void setup()   {
     for (int thisPin = 0; thisPin < NUM_RELAYS; thisPin++)  {
         pinMode(relayPins[thisPin][0], OUTPUT);
         pinMode(relayPins[thisPin][1], OUTPUT);
+    }
+    //init led pins as outputs
+    for (int thisPin = 0; thisPin < NUM_LEDS; thisPin++)  {
+        pinMode(ledPins[thisPin], OUTPUT);
+        digitalWrite(ledPins[thisPin],LOW);
     }
 
     //led_rgb1.cycleFromTo(Color::WHITE, Color::WHITE); //show off colors on init
@@ -231,7 +239,7 @@ int checkForChording(int pin_number){
 
     int flipBit(int abit){
         //Serial.println("flippin bit!");
-        return (abit+1)%2;
+        return !abit;
     }
 
     int setRelay(int relayNum, int state){
@@ -248,23 +256,26 @@ int checkForChording(int pin_number){
             return 0;
         }
         Serial.println("");
-        /*
-           if(state){
-           digitalWrite(relayPins[relayNum][0],HIGH);
-           digitalWrite(relayPins[relayNum][1],LOW);
-           rgb_led[relayNum].setColor(Color::CYAN);
-           }
-           else {
-           digitalWrite(relayPins[relayNum][0],LOW);
-           digitalWrite(relayPins[relayNum][1],HIGH);
-           rgb_led[relayNum].setColor(Color::YELLOW);
-           }
+        if(state){
+            //engage relay loop
+            digitalWrite(relayPins[relayNum][0],HIGH);
+            digitalWrite(relayPins[relayNum][1],LOW);
+            rgb_led[relayNum].setColor(Color::CYAN);
+            digitalWrite(ledPins[relayNum],LOW);
+        }
+        else {
+            //bypass relay loop
+            digitalWrite(relayPins[relayNum][0],LOW);
+            digitalWrite(relayPins[relayNum][1],HIGH);
+            rgb_led[relayNum].setColor(Color::YELLOW);
+            digitalWrite(ledPins[relayNum],HIGH);
+        }
 
-           delay(1);
+        delay(1);
         //done toggling, set both pins idle
         digitalWrite(relayPins[relayNum][0],LOW);
         digitalWrite(relayPins[relayNum][1],LOW);
-         */
+
         relayStates[relayNum] = state; //update the state array
         return 1;
     }
